@@ -1,13 +1,39 @@
 <?php
 
 namespace App\Exceptions;
-
+use Session;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Auth\AuthenticationException;
 
-class Handler extends ExceptionHandler
-{
-    /**
+
+
+
+
+
+    class Handler extends ExceptionHandler
+      {
+
+        protected function unauthenticated($request, AuthenticationException $exception)
+        {
+
+          // return $request->expectsJson()
+          //       ? response()->json(['message' => $exception->getMessage()], 401)
+          //       // yaha add garnu parne... Session::put('oldUrl', $request->url());
+          //
+          //       : redirect()->guest(route('user.login'));
+
+          if ($request->expectsJson()){
+            response()->json(['message' => $exception->getMessage()], 401);
+          }else{
+            Session::put('oldUrl', $request->url());
+            return redirect()->guest(route('user.login'));
+          }
+
+        }
+
+
+      /**
      * A list of the exception types that are not reported.
      *
      * @var array
@@ -46,6 +72,8 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        // dd($exception);
         return parent::render($request, $exception);
+
     }
 }
